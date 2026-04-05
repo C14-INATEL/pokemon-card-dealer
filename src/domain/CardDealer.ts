@@ -59,4 +59,13 @@ export class CardDealer {
     getTamanhoDeck(): number {
         return this.deck.length;
     }
+
+    getCardsByRaridade(raridade: string): PokemonCard[] {
+        const raridadesValidas = ["Comum", "Incomum", "Rara", "Lendária"];
+        if (!raridadesValidas.includes(raridade)) throw new Error(`Raridade '${raridade}' é inválida.`);
+
+        const resultado = this.deck.filter((c) => c.raridade === raridade);
+        if (resultado.length === 0) throw new Error(`Nenhuma carta com raridade '${raridade}' encontrada no deck.`);
+        return resultado;
+    }
 }
