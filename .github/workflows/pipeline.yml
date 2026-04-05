@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  checks: write
+
 jobs:
     # ----------------------------
     # JOB 1: Testes unitários
@@ -29,7 +35,6 @@ jobs:
 
             - name: Gerar relatório de cobertura de testes
               run: npm test -- --ci --coverage
-              continue-on-error: false
 
             - name: Fazer upload do relatório de cobertura como artifact
               uses: actions/upload-artifact@v4
@@ -90,11 +95,11 @@ jobs:
         steps:
             - name: Checkout do repositório
               uses: actions/checkout@v4
-        
+
             - name: Instalar Node.js
               uses: actions/setup-node@v4
               with:
-                node-version: 24
+                  node-version: 24
 
             - name: Instalar dependências via npm ci
               run: npm ci
@@ -106,13 +111,13 @@ jobs:
               uses: actions/configure-pages@v4
 
             - name: Fazer upload do relatório para Pages
-              uses: actions/upload-pages@v4
+              uses: actions/upload-pages-artifact@v3
               with:
-                path: coverage/lcov-report/
+                  path: coverage/lcov-report/
 
             - name: Deploy para Github Pages
               id: deployment
-            uses: actions/deploy-pages@v4
+              uses: actions/deploy-pages@v4
 
     # ----------------------------
     # JOB 4: Notificação
@@ -120,12 +125,12 @@ jobs:
     notificacao:
         name: Notificação de status por e-mail
         runs-on: ubuntu-latest
-        needs: [deploy]
+        needs: [testes, build, deploy]
         if: always()
 
         steps:
             - name: Enviar notificação de status do pipeline
-              uses: dawidd6/action-send-email@v3
+              uses: dawidd6/action-send-mail@v3
               with:
                 server_address: smtp.gmail.com
                 server_port: 465
@@ -133,21 +138,24 @@ jobs:
                 password: ${{ secrets.EMAIL_PASSWORD }}
                 to: ${{ secrets.EMAIL_TO }}
                 from: Pokemon Card Dealer CI/CD <${{ secrets.EMAIL_USERNAME }}>
-                subject: "[${{ job.status == 'success' && 'SUCESSO' || 'FALHA' }}] Pipeline Pokemon Card Dealer — ${{ github.ref_name }}"
-          body: |
-            Olá!
+                subject: "Pipeline Pokemon Card Dealer — ${{ github.ref_name }} | Testes: ${{ needs.testes.result }} | Build: ${{ needs.build.result }}"
+                body: |
+                    Olá!
 
-            O pipeline do projeto Pokemon Card Dealer foi concluído.
+                    O pipeline do projeto Pokemon Card Dealer foi concluído.
 
-            Repositório : ${{ github.repository }}
-            Branch      : ${{ github.ref_name }}
-            Commit      : ${{ github.sha }}
-            Autor       : ${{ github.actor }}
-            Status      : ${{ needs.deploy.result == 'success' && 'SUCESSO ✅' || 'FALHA ❌' }}
+                    Repositório : ${{ github.repository }}
+                    Branch      : ${{ github.ref_name }}
+                    Commit      : ${{ github.sha }}
+                    Autor       : ${{ github.actor }}
 
-            Relatório de cobertura:
-            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+                    Status dos jobs:
+                    Testes : ${{ needs.testes.result }}
+                    Build  : ${{ needs.build.result }}
+                    Deploy : ${{ needs.deploy.result }}
 
-            Acesse o repositório para mais detalhes:
-            https://github.com/${{ github.repository }}/actions
-                body: "O pipeline de CI/CD para o projeto Pokemon Card Dealer foi concluído. Verifique os detalhes do pipeline para mais informações."
+                    Relatório de cobertura:
+                    https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+                    Acesse o repositório para mais detalhes:
+                    https://github.com/${{ github.repository }}/actions
