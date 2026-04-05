@@ -39,7 +39,7 @@ export class CardDealer {
     }
 
     getCardMaisForte(): PokemonCard {
-    if(this.deck.length === 0) throw new Error("Deck está vazio.");
+    if(this.deck.length === 0) throw new Error("Deck está vazio. Não é possível obter a carta mais forte.");
     
     return this.deck.reduce((maisForte, card) => card.ataque > maisForte.ataque ? card : maisForte);
     }
