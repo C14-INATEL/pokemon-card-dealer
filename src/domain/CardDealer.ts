@@ -10,9 +10,11 @@ export class CardDealer {
 
         if(card.ataque < 0) throw new Error("Ataque da carta não pode ser negativo.");
 
+        if(card.nome.trim() === "") throw new Error("Nome da carta não pode ser vazio.");
+
         if(this.deck.some((c) => c.id === card.id)) throw new Error(`Carta com id ${card.id} já está no deck.`);
 
-        if(this.deck.length >= limiteDeck) throw new Error("Deck atingiu o limite de cartas.");
+        if(this.deck.length >= limiteDeck) throw new Error("Deck atingiu o limite de cartas. (Máximo: 5)");
     
         this.deck.push(card);
     }
@@ -20,7 +22,7 @@ export class CardDealer {
     removeCard(id: string): PokemonCard {
         const index = this.deck.findIndex((c) => c.id === id);
     
-        if(index === -1) throw new Error(`Carta com id ${id} não encontrada no deck.`);
+        if(index === -1) throw new Error(`Carta com id ${id} não encontrada no deck. Não foi possível remover.`);
     
         const [removedCard] = this.deck.splice(index, 1);
         return removedCard;
@@ -29,7 +31,7 @@ export class CardDealer {
     getCard(id: string): PokemonCard {
         const card = this.deck.find((c) => c.id === id);
     
-        if(!card) throw new Error(`Carta com id ${id} não encontrada no deck.`);
+        if(!card) throw new Error(`Carta com id ${id} não encontrada no deck. Não foi possível obter.`);
     
         return card;
     }

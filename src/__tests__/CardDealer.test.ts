@@ -139,7 +139,65 @@ describe("CardDealer — fluxo de extensão", () => {
     //Teste 1
     it("Deve lançar erro ao tentar obter carta mais forte de um deck vazio", () => {               
         const dealer = new CardDealer();
-
         expect(() => dealer.getCardMaisForte()).toThrow("Deck está vazio. Não é possível obter a carta mais forte.");
+    });
+
+    //Teste 2
+    it("Deve lançar erro ao adicionar carta com HP igual a zero", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.addCard(criarCard({ hp: 0 }))).toThrow("HP da carta deve ser maior que 0.");
+    });
+
+    //Teste 3
+    it("Deve lançar erro ao adicionar carta com ataque negativo", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.addCard(criarCard({ ataque: -5 }))).toThrow("Ataque da carta não pode ser negativo.");
+    });
+
+    //Teste 4
+    it("Deve lançar erro ao adicionar carta já existente", () => {
+        const dealer = new CardDealer();
+        dealer.addCard(criarCard({ id: "150" }));
+        expect(() => dealer.addCard(criarCard({ id: "150" }))).toThrow("Carta com id 150 já está no deck.");
+    });
+
+    //Teste 5
+    it("Deve lançar erro ao tentar adicionar carta em deck cheio", () => {
+        const dealer = new CardDealer();
+        for (let i = 0; i < 5; i++) {
+            dealer.addCard(criarCard({ id: `${i}` }));
+        }
+        expect(() => dealer.addCard(criarCard({ id: "151" }))).toThrow("Deck atingiu o limite de cartas. (Máximo: 5)");
+    });
+
+    //Teste 6
+    it("Deve lançar erro ao remover carta com ID inexistente", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.removeCard("151")).toThrow("Carta com id 151 não encontrada no deck. Não foi possível remover.");
+    });
+
+    //Teste 7
+    it("Deve lançar erro ao buscar carta com ID inexistente", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.getCard("151")).toThrow("Carta com id 151 não encontrada no deck. Não foi possível obter.");
+    });
+
+    //Teste 8
+    it("Deve lançar erro ao tentar adicionar carta com nome vazio", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.addCard(criarCard({ nome: "" }))).toThrow("Nome da carta não pode ser vazio.");
+    });
+
+    //Teste 9
+    it("Deve lançar erro ao buscar raridade inválida", () => {
+        const dealer = new CardDealer();
+        expect(() => dealer.getCardsByRaridade("Mítica")).toThrow("Raridade 'Mítica' é inválida.");
+    });
+
+    //Teste 10
+    it("Deve lançar erro ao buscar raridade válida sem cartas no deck", () => {
+        const dealer = new CardDealer();
+        dealer.addCard(criarCard({ id: "1", raridade: "Comum" }));
+        expect(() => dealer.getCardsByRaridade("Lendária")).toThrow("Nenhuma carta com raridade 'Lendária' encontrada no deck.");
     });
 })
